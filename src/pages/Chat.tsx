@@ -4,7 +4,11 @@ import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import characterPlaceholder from "@/assets/character-placeholder.png";
+import xiaoyi from "@/assets/xiaoyi.png";
+import luchen from "@/assets/luchen.png";
+import qisili from "@/assets/qisili.png";
+import chaliesu from "@/assets/chaliesu.png";
+import xiamingxing from "@/assets/xiamingxing.png";
 
 interface Message {
   id: number;
@@ -24,11 +28,11 @@ const Chat = () => {
   const [selectedCharacter, setSelectedCharacter] = useState(1);
 
   const characters = [
-    { id: 1, name: "角色一" },
-    { id: 2, name: "角色二" },
-    { id: 3, name: "角色三" },
-    { id: 4, name: "角色四" },
-    { id: 5, name: "角色五" },
+    { id: 1, name: "萧逸", image: xiaoyi },
+    { id: 2, name: "陆沉", image: luchen },
+    { id: 3, name: "齐司礼", image: qisili },
+    { id: 4, name: "查理苏", image: chaliesu },
+    { id: 5, name: "夏鸣星", image: xiamingxing },
   ];
 
   const handleSend = () => {
@@ -67,7 +71,7 @@ const Chat = () => {
               <div className="p-4 border-b border-border bg-secondary/50">
                 <div className="flex items-center gap-3">
                   <img
-                    src={characterPlaceholder}
+                    src={characters.find((c) => c.id === selectedCharacter)?.image}
                     alt="Character"
                     className="w-10 h-10 rounded-full border-2 border-primary"
                   />
@@ -141,7 +145,7 @@ const Chat = () => {
                       }`}
                     >
                       <img
-                        src={characterPlaceholder}
+                        src={character.image}
                         alt={character.name}
                         className="w-10 h-10 rounded-full"
                       />

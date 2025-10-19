@@ -2,15 +2,19 @@ import { Link } from "react-router-dom";
 import { Sparkles, MessageCircle, Image as ImageIcon, Users as UsersIcon } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import heroBackground from "@/assets/hero-background.jpg";
-import characterPlaceholder from "@/assets/character-placeholder.png";
+import xiaoyi from "@/assets/xiaoyi.png";
+import luchen from "@/assets/luchen.png";
+import qisili from "@/assets/qisili.png";
+import chaliesu from "@/assets/chaliesu.png";
+import xiamingxing from "@/assets/xiamingxing.png";
 
 const Index = () => {
   const characters = [
-    { id: 1, name: "角色一", image: characterPlaceholder },
-    { id: 2, name: "角色二", image: characterPlaceholder },
-    { id: 3, name: "角色三", image: characterPlaceholder },
-    { id: 4, name: "角色四", image: characterPlaceholder },
-    { id: 5, name: "角色五", image: characterPlaceholder },
+    { id: 1, name: "萧逸", image: xiaoyi },
+    { id: 2, name: "陆沉", image: luchen },
+    { id: 3, name: "齐司礼", image: qisili },
+    { id: 4, name: "查理苏", image: chaliesu },
+    { id: 5, name: "夏鸣星", image: xiamingxing },
   ];
 
   const features = [
