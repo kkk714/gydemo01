@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 import {
   Select,
   SelectContent,
@@ -16,6 +17,8 @@ const ImageGen = () => {
   const [prompt, setPrompt] = useState("");
   const [style, setStyle] = useState("romantic");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const styles = [
     { value: "romantic", label: "浪漫" },
@@ -24,11 +27,54 @@ const ImageGen = () => {
     { value: "formal", label: "正式" },
   ];
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
+    const apiKey = localStorage.getItem("siliconflow_api_key");
+    if (!apiKey) {
+      toast({
+        title: "未设置API密钥",
+        description: "请先在设置页面配置API密钥",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsGenerating(true);
-    setTimeout(() => {
+
+    try {
+      const response = await fetch("https://api.siliconflow.cn/v1/images/generations", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "black-forest-labs/FLUX.1-schnell",
+          prompt: prompt,
+          image_size: "1024x1024",
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error?.message || "图片生成失败");
+      }
+
+      setGeneratedImage(data.images[0].url);
+      toast({
+        title: "生成成功",
+        description: "图片已生成完成",
+      });
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "错误",
+        description: error instanceof Error ? error.message : "图片生成失败",
+        variant: "destructive",
+      });
+    } finally {
       setIsGenerating(false);
-    }, 3000);
+    }
   };
 
   return (
@@ -115,12 +161,18 @@ const ImageGen = () => {
                   预览
                 </h3>
 
-                <div className="aspect-square rounded-xl bg-secondary/50 border-2 border-dashed border-border flex items-center justify-center mb-4">
+                <div className="aspect-square rounded-xl bg-secondary/50 border-2 border-dashed border-border flex items-center justify-center mb-4 overflow-hidden">
                   {isGenerating ? (
                     <div className="text-center">
                       <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
                       <p className="text-muted-foreground">正在生成中...</p>
                     </div>
+                  ) : generatedImage ? (
+                    <img
+                      src={generatedImage}
+                      alt="Generated"
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
                     <p className="text-muted-foreground">生成的图片将在这里显示</p>
                   )}
@@ -130,7 +182,15 @@ const ImageGen = () => {
                   <Button
                     variant="outline"
                     className="flex-1"
-                    disabled={isGenerating}
+                    disabled={isGenerating || !generatedImage}
+                    onClick={() => {
+                      if (generatedImage) {
+                        const a = document.createElement("a");
+                        a.href = generatedImage;
+                        a.download = "generated-image.png";
+                        a.click();
+                      }
+                    }}
                   >
                     <Download className="w-4 h-4 mr-2" />
                     下载
@@ -138,7 +198,7 @@ const ImageGen = () => {
                   <Button
                     variant="outline"
                     className="flex-1"
-                    disabled={isGenerating}
+                    disabled={isGenerating || !generatedImage}
                   >
                     <Share2 className="w-4 h-4 mr-2" />
                     分享

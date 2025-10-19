@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Send } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useToast } from "@/hooks/use-toast";
 import xiaoyi from "@/assets/xiaoyi.png";
 import luchen from "@/assets/luchen.png";
 import qisili from "@/assets/qisili.png";
@@ -26,6 +27,9 @@ const Chat = () => {
   ]);
   const [input, setInput] = useState("");
   const [selectedCharacter, setSelectedCharacter] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   const characters = [
     { id: 1, name: "萧逸", image: xiaoyi },
@@ -35,8 +39,24 @@ const Chat = () => {
     { id: 5, name: "夏鸣星", image: xiamingxing },
   ];
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return;
+
+    const apiKey = localStorage.getItem("siliconflow_api_key");
+    if (!apiKey) {
+      toast({
+        title: "未设置API密钥",
+        description: "请先在设置页面配置API密钥",
+        variant: "destructive",
+      });
+      return;
+    }
 
     const userMessage: Message = {
       id: messages.length + 1,
@@ -44,18 +64,50 @@ const Chat = () => {
       content: input,
     };
 
-    setMessages([...messages, userMessage]);
+    const newMessages = [...messages, userMessage];
+    setMessages(newMessages);
     setInput("");
+    setIsLoading(true);
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      const response = await fetch("https://api.siliconflow.cn/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "Qwen/Qwen2-7B-Instruct",
+          messages: newMessages.map((msg) => ({
+            role: msg.role,
+            content: msg.content,
+          })),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error?.message || "API请求失败");
+      }
+
       const aiMessage: Message = {
-        id: messages.length + 2,
+        id: newMessages.length + 1,
         role: "assistant",
-        content: "这是一个模拟回复。实际应用中会连接到AI接口。",
+        content: data.choices[0].message.content,
       };
-      setMessages((prev) => [...prev, aiMessage]);
-    }, 1000);
+
+      setMessages([...newMessages, aiMessage]);
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "错误",
+        description: error instanceof Error ? error.message : "发送消息失败",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -85,7 +137,7 @@ const Chat = () => {
               </div>
 
               {/* Messages */}
-              <ScrollArea className="flex-1 p-4">
+              <ScrollArea className="flex-1 p-4" ref={scrollRef}>
                 <div className="space-y-4">
                   {messages.map((message) => (
                     <div
@@ -120,6 +172,7 @@ const Chat = () => {
                   />
                   <Button
                     onClick={handleSend}
+                    disabled={isLoading}
                     className="bg-gradient-accent hover:shadow-glow"
                   >
                     <Send className="w-4 h-4" />
@@ -132,7 +185,6 @@ const Chat = () => {
             <div className="lg:col-span-1 space-y-6">
               {/* Character Selection */}
               <div className="bg-card rounded-2xl border border-border p-4">
-                <h3 className="font-semibold mb-4 text-foreground">选择角色</h3>
                 <div className="space-y-2">
                   {characters.map((character) => (
                     <button

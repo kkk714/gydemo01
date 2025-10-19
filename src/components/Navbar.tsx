@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { MessageSquare, Image, Users, Home } from "lucide-react";
+import { MessageSquare, Image, Users, Home, Settings } from "lucide-react";
 
 const Navbar = () => {
   const location = useLocation();
@@ -11,6 +11,7 @@ const Navbar = () => {
     { path: "/chat", icon: MessageSquare, label: "对话" },
     { path: "/image-gen", icon: Image, label: "图片" },
     { path: "/community", icon: Users, label: "社区" },
+    { path: "/settings", icon: Settings, label: "设置" },
   ];
   
   return (
