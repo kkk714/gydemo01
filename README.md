@@ -1,73 +1,43 @@
-# Welcome to your Lovable project
+光与夜之恋 · AI 互动生成平台
 
-## Project info
+项目概述 | Overview
 
-**URL**: https://lovable.dev/projects/97568823-d8ef-43ca-b2be-fcdba56f3f41
+这是一款基于恋爱养成游戏《光与夜之恋》世界观打造的 AI 互动体验平台。
+项目利用 大语言模型 (LLM) 与 AI 图像生成技术，让玩家可以：
+	•	与五位男主角进行风格各异的 情感对话
+	•	上传照片或文字，生成与角色的 互动合成图像
+	•	在社区中分享、评论与他人交流创作
 
-## How can I edit this code?
+This project reimagines Light and Night through AI, combining large language models and AI image generation to build an immersive fan experience.
+Users can chat with five protagonists whose personalities are customized through LLM prompts, or create blended portraits by uploading photos and text.
+A built-in community enables sharing and creative interaction among fans.
 
-There are several ways of editing your application.
 
-**Use Lovable**
+特色亮点 | Features
+•	多角色情感对话：五位主角均配有独立性格与语气风格，聊天体验细腻自然。
+•	智能人格建模：基于 Qwen / Qwen2-7B-Instruct，通过修改 System Prompt 调整角色语气与行为。
+•	AI 合成图像生成：集成 Kwai-Kolors/Kolors，支持照片融合与文字生成模式。
+•	互动社区：用户可在社区发布图片、文字、点赞与评论，形成角色共创氛围。
+•	免注册体验：无需账号即可开始对话与图片生成。
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/97568823-d8ef-43ca-b2be-fcdba56f3f41) and start prompting.
 
-Changes made via Lovable will be committed automatically to this repo.
+技术实现 | Tech Overview
 
-**Use your preferred IDE**
+模块	技术栈 / 平台
+可视化开发	Lovable + Cursor
+语言模型	Qwen / Qwen2-7B-Instruct
+图像生成	Kwai-Kolors / Kolors
+后端逻辑	LLM 接口调用 + Prompt Engineering
+UI结构	五大页面：主页、对话、图像生成、社区、登录
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+所有角色版权归《光与夜之恋》官方所有，本项目仅供学习与展示使用。
 
-Follow these steps:
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
-npm i
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/97568823-d8ef-43ca-b2be-fcdba56f3f41) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+   致谢 | Acknowledgements
+	•	感谢 Qwen 团队 提供开放模型支持
+	•	感谢 Kwai-Kolors 提供图像生成能力
+	•	感谢 Lovable 提供直观的低代码创作平台
