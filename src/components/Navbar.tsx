@@ -1,10 +1,32 @@
-import { Link, useLocation } from "react-router-dom";
-import { MessageSquare, Image, Users, Home, Settings } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { MessageSquare, Image, Users, Home, Settings, LogOut } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast";
 
 const Navbar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const [currentUser, setCurrentUser] = useState<{ email: string } | null>(null);
+  
+  useEffect(() => {
+    const user = localStorage.getItem("currentUser");
+    if (user) {
+      setCurrentUser(JSON.parse(user));
+    }
+  }, [location]);
   
   const isActive = (path: string) => location.pathname === path;
+  
+  const handleLogout = () => {
+    localStorage.removeItem("currentUser");
+    setCurrentUser(null);
+    toast({
+      title: "已退出登录",
+      description: "期待您的再次光临",
+    });
+    navigate("/");
+  };
   
   const navItems = [
     { path: "/", icon: Home, label: "首页" },
@@ -41,12 +63,27 @@ const Navbar = () => {
               );
             })}
             
-            <Link
-              to="/auth"
-              className="px-4 py-2 rounded-lg bg-gradient-gold text-accent-foreground font-medium text-sm hover:shadow-glow transition-all"
-            >
-              登录
-            </Link>
+            {currentUser ? (
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-muted-foreground">{currentUser.email}</span>
+                <Button
+                  onClick={handleLogout}
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  退出
+                </Button>
+              </div>
+            ) : (
+              <Link
+                to="/auth"
+                className="px-4 py-2 rounded-lg bg-gradient-gold text-accent-foreground font-medium text-sm hover:shadow-glow transition-all"
+              >
+                登录
+              </Link>
+            )}
           </div>
         </div>
       </div>

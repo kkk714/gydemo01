@@ -1,13 +1,24 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "@/hooks/use-toast";
 import heroBackground from "@/assets/hero-background.jpg";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const currentUser = localStorage.getItem("currentUser");
+    if (currentUser) {
+      navigate("/chat");
+    }
+  }, [navigate]);
 
   const benefits = [
     "永久保存对话记录",
@@ -15,6 +26,52 @@ const Auth = () => {
     "加入温暖社区",
     "解锁专属功能",
   ];
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (isLogin) {
+      // Login logic
+      const users = JSON.parse(localStorage.getItem("users") || "[]");
+      const user = users.find((u: any) => u.email === email && u.password === password);
+      
+      if (user) {
+        localStorage.setItem("currentUser", JSON.stringify({ email: user.email }));
+        toast({
+          title: "登录成功",
+          description: "欢迎回来！",
+        });
+        navigate("/chat");
+      } else {
+        toast({
+          title: "登录失败",
+          description: "邮箱或密码错误",
+          variant: "destructive",
+        });
+      }
+    } else {
+      // Signup logic
+      const users = JSON.parse(localStorage.getItem("users") || "[]");
+      const existingUser = users.find((u: any) => u.email === email);
+      
+      if (existingUser) {
+        toast({
+          title: "注册失败",
+          description: "该邮箱已被注册",
+          variant: "destructive",
+        });
+      } else {
+        users.push({ email, password });
+        localStorage.setItem("users", JSON.stringify(users));
+        localStorage.setItem("currentUser", JSON.stringify({ email }));
+        toast({
+          title: "注册成功",
+          description: "欢迎加入！",
+        });
+        navigate("/chat");
+      }
+    }
+  };
 
   return (
     <div
@@ -35,7 +92,7 @@ const Auth = () => {
             {isLogin ? "继续你的奇妙旅程" : "开启你的专属故事"}
           </p>
 
-          <form className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <Label htmlFor="email" className="text-foreground">
                 邮箱
@@ -47,6 +104,9 @@ const Auth = () => {
                   type="email"
                   placeholder="your@email.com"
                   className="pl-10 bg-background"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
                 />
               </div>
             </div>
@@ -62,24 +122,15 @@ const Auth = () => {
                   type="password"
                   placeholder="••••••••"
                   className="pl-10 bg-background"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={6}
                 />
               </div>
             </div>
 
-            {!isLogin && (
-              <div>
-                <Label htmlFor="game-id" className="text-foreground">
-                  游戏ID（可选）
-                </Label>
-                <Input
-                  id="game-id"
-                  placeholder="验证你的游戏账户"
-                  className="mt-2 bg-background"
-                />
-              </div>
-            )}
-
-            <Button className="w-full bg-gradient-accent hover:shadow-glow">
+            <Button type="submit" className="w-full bg-gradient-accent hover:shadow-glow">
               {isLogin ? "登录" : "注册"}
             </Button>
           </form>
