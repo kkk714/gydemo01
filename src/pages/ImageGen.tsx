@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Sparkles, Download, Share2 } from "lucide-react";
+import { Sparkles, Download, Share2, Upload } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,20 +14,58 @@ import {
 } from "@/components/ui/select";
 
 const ImageGen = () => {
-  const [prompt, setPrompt] = useState("");
-  const [style, setStyle] = useState("romantic");
+  const [userPhoto, setUserPhoto] = useState<string | null>(null);
+  const [characterPhotos, setCharacterPhotos] = useState<(string | null)[]>([null, null, null, null, null]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const styles = [
-    { value: "romantic", label: "浪漫" },
-    { value: "daily", label: "日常" },
-    { value: "fantasy", label: "梦幻" },
-    { value: "formal", label: "正式" },
-  ];
+  const characterNames = ["夏明星", "查理苏", "齐思礼", "陆晨", "小易"];
+
+  const handleUserPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setUserPhoto(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCharacterPhotoUpload = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const newPhotos = [...characterPhotos];
+        newPhotos[index] = e.target?.result as string;
+        setCharacterPhotos(newPhotos);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleGenerate = async () => {
+    if (!userPhoto) {
+      toast({
+        title: "请上传您的照片",
+        description: "需要上传您的照片才能生成合照",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const uploadedCount = characterPhotos.filter(p => p !== null).length;
+    if (uploadedCount === 0) {
+      toast({
+        title: "请至少上传一张角色照片",
+        description: "需要至少一张角色照片才能生成合照",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const apiKey = localStorage.getItem("siliconflow_api_key");
     if (!apiKey) {
       toast({
@@ -41,6 +79,13 @@ const ImageGen = () => {
     setIsGenerating(true);
 
     try {
+      const uploadedCharacters = characterPhotos
+        .map((photo, index) => photo ? characterNames[index] : null)
+        .filter(name => name !== null)
+        .join("、");
+
+      const prompt = `一张温馨的合照，包含用户和${uploadedCharacters}，大家站在一起微笑，背景是温暖的场景，高质量摄影，自然光线，真实感`;
+
       const response = await fetch("https://api.siliconflow.cn/v1/images/generations", {
         method: "POST",
         headers: {
@@ -57,19 +102,19 @@ const ImageGen = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error?.message || "图片生成失败");
+        throw new Error(data.error?.message || "合照生成失败");
       }
 
       setGeneratedImage(data.images[0].url);
       toast({
         title: "生成成功",
-        description: "图片已生成完成",
+        description: "合照已生成完成",
       });
     } catch (error) {
       console.error(error);
       toast({
         title: "错误",
-        description: error instanceof Error ? error.message : "图片生成失败",
+        description: error instanceof Error ? error.message : "合照生成失败",
         variant: "destructive",
       });
     } finally {
@@ -84,73 +129,98 @@ const ImageGen = () => {
       <div className="pt-20 px-4 pb-8">
         <div className="container mx-auto max-w-6xl">
           <h1 className="text-3xl font-bold mb-8 text-center text-foreground">
-            AI 图片生成工作台
+            生成专属合照
           </h1>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Settings Panel */}
+            {/* Upload Panel */}
             <div className="space-y-6">
               <div className="bg-card rounded-2xl border border-border p-6">
                 <h3 className="text-xl font-semibold mb-4 text-foreground">
-                  创作参数
+                  上传您的照片
                 </h3>
-
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="prompt" className="text-foreground">
-                      描述你想要的画面
-                    </Label>
-                    <Textarea
-                      id="prompt"
-                      value={prompt}
-                      onChange={(e) => setPrompt(e.target.value)}
-                      placeholder="例如：在星空下的浪漫约会，两个人坐在长椅上..."
-                      className="mt-2 min-h-[120px] bg-background"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="style" className="text-foreground">
-                      画面风格
-                    </Label>
-                    <Select value={style} onValueChange={setStyle}>
-                      <SelectTrigger className="mt-2 bg-background">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {styles.map((s) => (
-                          <SelectItem key={s.value} value={s.value}>
-                            {s.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <Button
-                    onClick={handleGenerate}
-                    disabled={!prompt.trim() || isGenerating}
-                    className="w-full bg-gradient-accent hover:shadow-glow"
-                  >
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    {isGenerating ? "生成中..." : "开始生成"}
-                  </Button>
+                <div className="aspect-square rounded-xl bg-secondary/50 border-2 border-dashed border-border flex items-center justify-center overflow-hidden cursor-pointer hover:bg-secondary/70 transition-colors">
+                  {userPhoto ? (
+                    <img src={userPhoto} alt="User" className="w-full h-full object-cover" />
+                  ) : (
+                    <label htmlFor="user-photo" className="cursor-pointer flex flex-col items-center">
+                      <Upload className="w-12 h-12 text-muted-foreground mb-2" />
+                      <p className="text-muted-foreground text-sm">点击上传您的照片</p>
+                      <input
+                        id="user-photo"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleUserPhotoUpload}
+                        className="hidden"
+                      />
+                    </label>
+                  )}
                 </div>
+                {userPhoto && (
+                  <Button
+                    variant="outline"
+                    className="w-full mt-3"
+                    onClick={() => setUserPhoto(null)}
+                  >
+                    重新上传
+                  </Button>
+                )}
               </div>
 
-              {/* Gallery */}
               <div className="bg-card rounded-2xl border border-border p-6">
                 <h3 className="text-xl font-semibold mb-4 text-foreground">
-                  已生成作品
+                  上传角色照片
                 </h3>
                 <div className="grid grid-cols-2 gap-3">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div
-                      key={i}
-                      className="aspect-square rounded-lg bg-secondary/50 border border-border"
-                    />
+                  {characterNames.map((name, index) => (
+                    <div key={index} className="space-y-2">
+                      <Label className="text-sm text-muted-foreground">{name}</Label>
+                      <div className="aspect-square rounded-lg bg-secondary/50 border border-border flex items-center justify-center overflow-hidden cursor-pointer hover:bg-secondary/70 transition-colors">
+                        {characterPhotos[index] ? (
+                          <img
+                            src={characterPhotos[index]!}
+                            alt={name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <label htmlFor={`character-${index}`} className="cursor-pointer flex flex-col items-center p-2">
+                            <Upload className="w-6 h-6 text-muted-foreground mb-1" />
+                            <p className="text-muted-foreground text-xs text-center">点击上传</p>
+                            <input
+                              id={`character-${index}`}
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => handleCharacterPhotoUpload(index, e)}
+                              className="hidden"
+                            />
+                          </label>
+                        )}
+                      </div>
+                      {characterPhotos[index] && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full text-xs"
+                          onClick={() => {
+                            const newPhotos = [...characterPhotos];
+                            newPhotos[index] = null;
+                            setCharacterPhotos(newPhotos);
+                          }}
+                        >
+                          移除
+                        </Button>
+                      )}
+                    </div>
                   ))}
                 </div>
+                <Button
+                  onClick={handleGenerate}
+                  disabled={!userPhoto || isGenerating}
+                  className="w-full mt-4 bg-gradient-accent hover:shadow-glow"
+                >
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  {isGenerating ? "生成中..." : "生成合照"}
+                </Button>
               </div>
             </div>
 
