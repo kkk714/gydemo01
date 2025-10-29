@@ -45,6 +45,17 @@ const Chat = () => {
     }
   }, [messages]);
 
+  const handleCharacterSelect = (characterId: number) => {
+    setSelectedCharacter(characterId);
+    setMessages([
+      {
+        id: 1,
+        role: "assistant",
+        content: "你好，很高兴见到你。今天想和我聊些什么呢？",
+      },
+    ]);
+  };
+
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
@@ -125,7 +136,7 @@ const Chat = () => {
                   <img
                     src={characters.find((c) => c.id === selectedCharacter)?.image}
                     alt="Character"
-                    className="w-10 h-10 rounded-full border-2 border-primary"
+                    className="w-10 h-10 rounded-full border-2 border-primary object-cover"
                   />
                   <div>
                     <h3 className="font-semibold text-foreground">
@@ -185,37 +196,28 @@ const Chat = () => {
             <div className="lg:col-span-1 space-y-6">
               {/* Character Selection */}
               <div className="bg-card rounded-2xl border border-border p-4">
-                <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-3">
                   {characters.map((character) => (
                     <button
                       key={character.id}
-                      onClick={() => setSelectedCharacter(character.id)}
-                      className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
+                      onClick={() => handleCharacterSelect(character.id)}
+                      className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all ${
                         selectedCharacter === character.id
-                          ? "bg-primary text-primary-foreground"
+                          ? "bg-primary text-primary-foreground ring-2 ring-primary"
                           : "bg-secondary hover:bg-secondary/80 text-foreground"
                       }`}
                     >
-                      <img
-                        src={character.image}
-                        alt={character.name}
-                        className="w-10 h-10 rounded-full"
-                      />
-                      <span className="font-medium">{character.name}</span>
+                      <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-border">
+                        <img
+                          src={character.image}
+                          alt={character.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <span className="font-medium text-sm">{character.name}</span>
                     </button>
                   ))}
                 </div>
-              </div>
-
-              {/* Tips */}
-              <div className="bg-card rounded-2xl border border-border p-4">
-                <h3 className="font-semibold mb-2 text-foreground">提示</h3>
-                <p className="text-sm text-muted-foreground">
-                  登录后可保存所有对话记录，解锁更多功能。
-                </p>
-                <Button className="w-full mt-3 bg-gradient-gold">
-                  立即登录
-                </Button>
               </div>
             </div>
           </div>
