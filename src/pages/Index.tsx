@@ -68,8 +68,9 @@ const Index = () => {
           {/* Character Grid */}
           <div className="flex justify-center items-center gap-8 mb-16 flex-wrap animate-slide-up">
             {characters.map((character, index) => (
-              <div
+              <Link
                 key={character.id}
+                to={`/chat?character=${character.id}`}
                 className="flex flex-col items-center gap-3 group cursor-pointer"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
@@ -83,7 +84,7 @@ const Index = () => {
                 <span className="text-sm md:text-base font-medium text-foreground group-hover:text-accent transition-colors">
                   {character.name}
                 </span>
-              </div>
+              </Link>
             ))}
           </div>
 

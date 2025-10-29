@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Send } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,8 @@ interface Message {
 }
 
 const Chat = () => {
+  const [searchParams] = useSearchParams();
+  const characterIdFromUrl = searchParams.get("character");
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
@@ -26,7 +29,9 @@ const Chat = () => {
     },
   ]);
   const [input, setInput] = useState("");
-  const [selectedCharacter, setSelectedCharacter] = useState(1);
+  const [selectedCharacter, setSelectedCharacter] = useState(
+    characterIdFromUrl ? parseInt(characterIdFromUrl) : 1
+  );
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -126,10 +131,10 @@ const Chat = () => {
       <Navbar />
 
       <div className="pt-20 px-4 pb-4">
-        <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[calc(100vh-8rem)]">
+        <div className="container mx-auto max-w-5xl">
+          <div className="h-[calc(100vh-8rem)]">
             {/* Chat Area */}
-            <div className="lg:col-span-3 bg-card rounded-2xl border border-border overflow-hidden flex flex-col">
+            <div className="bg-card rounded-2xl border border-border overflow-hidden flex flex-col h-full">
               {/* Chat Header */}
               <div className="p-4 border-b border-border bg-secondary/50">
                 <div className="flex items-center gap-3">
@@ -188,35 +193,6 @@ const Chat = () => {
                   >
                     <Send className="w-4 h-4" />
                   </Button>
-                </div>
-              </div>
-            </div>
-
-            {/* Sidebar */}
-            <div className="lg:col-span-1 space-y-6">
-              {/* Character Selection */}
-              <div className="bg-card rounded-2xl border border-border p-4">
-                <div className="grid grid-cols-2 gap-3">
-                  {characters.map((character) => (
-                    <button
-                      key={character.id}
-                      onClick={() => handleCharacterSelect(character.id)}
-                      className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all ${
-                        selectedCharacter === character.id
-                          ? "bg-primary text-primary-foreground ring-2 ring-primary"
-                          : "bg-secondary hover:bg-secondary/80 text-foreground"
-                      }`}
-                    >
-                      <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-border">
-                        <img
-                          src={character.image}
-                          alt={character.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <span className="font-medium text-sm">{character.name}</span>
-                    </button>
-                  ))}
                 </div>
               </div>
             </div>
