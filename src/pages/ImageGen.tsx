@@ -15,12 +15,12 @@ import {
 
 const ImageGen = () => {
   const [userPhoto, setUserPhoto] = useState<string | null>(null);
-  const [characterPhotos, setCharacterPhotos] = useState<(string | null)[]>([null, null, null, null]);
+  const [characterPhotos, setCharacterPhotos] = useState<(string | null)[]>([null, null, null, null, null]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const characterNames = ["夏鸣星", "齐司礼", "陆沉", "萧逸"];
+  const characterNames = ["夏鸣星", "查理苏", "齐司礼", "陆沉", "萧逸"];
   const [textPrompt, setTextPrompt] = useState("");
   const [selectedCharacterIndex, setSelectedCharacterIndex] = useState<number | null>(null);
 
